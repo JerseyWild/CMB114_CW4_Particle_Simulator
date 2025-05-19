@@ -9,27 +9,50 @@ importlib.reload(turt) # forces turtle to be reloaded to prevent crashing
 
 
 def simulator_window(): # function responsible for the simulator page
-    simulator_win = Toplevel(master)
-    simulator_win.title("Particle Simulator - Simulator Page")
-    simulator_win.geometry(f"800x500+{center_x}+{center_y}")
-    simulator_can = Canvas(simulator_win, bg="black", height=300, width=300)
+    simulator_win = Toplevel(master) # creates a window on top of the home page window for the simulator
+    simulator_win.title("Particle Simulator - Simulator Page") # gives the simulator window a window title
+    simulator_win.geometry(f"800x500+{center_x}+{center_y}") # sets the dimensions of the window and places it in the middle of the screen
+    simulator_can = Canvas(simulator_win, height=300, width=300) # creates a white canvas in the middle of the window
 
-    turt_can = turt.TurtleScreen(simulator_can)
-    #turt_can.tracer(0)
-    turt_can.bgcolor("black")
-
-    simulator_can.place(x=250, y=75)
-
-    numofparts = StringVar()
-    def submit_entry():
+    turt_can = turt.TurtleScreen(simulator_can) # makes the canvas a turtle canvas
+    turt_can.bgcolor("white") # makes the canvas black
+    turt_can.tracer(n=None, delay=None)
+    simulator_can.place(x=250, y=75) # places the canvas in the middle of the screen
+    turt_can.update()
+    numofparts = StringVar() # defines a String Variable
+    def add_particles(): # function responsible for
+        turt_can.update()
+        int_numofparts = int(numofparts.get())
         if numofparts.get() == "":
             print("Number of particles: 0")
         else:
             print("Number of particles:", numofparts.get())
-        
+        turts_list = []
+        for i in range(int_numofparts):
+            turt_can.tracer(n=None, delay=None)
+            #turts_list.append(turt.RawTurtle(turt_can))
+        turt_can.update()
+##        for i in range (len(turts_list)):
+##            turts_list[i].hideturtle()
+##            turts_list[i].penup()
+##
+##            turts_list[i].shape("circle")
+##            turts_list[i].turtlesize(stretch_wid=1, stretch_len=1)
+##            turts_list[i].pencolor("blue")
+##            turts_list[i].fillcolor("blue")
+##            turts_list[i].pensize(5)
+##            
+##            turts_list[i].goto(-140,-139)
+##            turts_list[i].showturtle()
+##            turts_list[i].goto(0,0)
+
+    part_num_title = Label(simulator_win, text="Number of particles:")
+    part_num_title.place(x=50, y=25)
+    
     part_num_entry = Entry(simulator_win, textvariable=numofparts)
     part_num_entry.place(x=50,y=50)
-    part_num_button = Button(simulator_win, text="Submit", command=submit_entry)
+    
+    part_num_button = Button(simulator_win, text="Submit", command=add_particles)
     part_num_button.place(x=180, y=45)
 
 
