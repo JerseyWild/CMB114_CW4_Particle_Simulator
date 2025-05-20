@@ -4,6 +4,7 @@ from tkinter import * # imports all modules from tkinter
 from tkinter import ttk # imports themed tkinter from tkinter
 from turtle import *
 import importlib
+import random
 
 #importlib.reload(*) # forces turtle to be reloaded to prevent crashing
 
@@ -60,12 +61,13 @@ def home_window():
         # CREATING A TURTLE CANVAS ON THE TKINTER CANVAS ON SIMULATOR WINDOW
         turt_can = TurtleScreen(simulator_can) # makes the canvas a turtle canvas
         turt_can.bgcolor("black") # makes the canvas black
-        
+
+        turt_can.listen()
         turt_can.tracer(0) # hides any turtle animation, including the black arrow
 
         # CREATING A BOUNDARY BOX IN THE TURTLE CANVAS
         box = RawTurtle(turt_can)
-        #box.hideturtle()
+        box.hideturtle()
         box.color("darkgrey")
         box.pensize(10)
         box.shape("square")
@@ -82,43 +84,8 @@ def home_window():
             box.right(90)
         box.penup()
 
-
         
         
-        class Particle: # controls each particle
-
-            def __init__(self, color, speed): # initialises the particle's attributes e.g. color
-
-                super().__init__()
-                self = RawTurtle(turt_can)
-                self.hideturtle() # hides the current turtle
-                self.speed(0)
-                self.penup()
-                self.shape("circle")
-                self.turtlesize(stretch_wid=1, stretch_len=1)
-                self.pencolor(color)
-                self.fillcolor(color)
-                self.pensize(5)
-                self.goto(-140,-139)
-                self.dx = speed
-                self.dy = speed
-                self.wefege = 10
-
-                #self.move_particle()
-
-            def move_particle(self):
-                
-                self.setx(self.xcor() + self.dx)
-                self.sety(self.ycor() + self.dy)
-
-            def bounce_particle(self):
-
-                if self.xcor() > 100:
-                    self.setx(100)
-                    self.dx *= -1
-                if self.ycor() > 100:
-                    self.sety(100)
-                    self.dy *= -1
                 
     
     
@@ -143,16 +110,64 @@ def home_window():
             else:
                 print("Number of particles:", numofparts.get())
 
+            class Particle(RawTurtle): # controls each particle
+            #part = RawTurtle(turt_can)
+
+                def __init__(self, turt_can, colour, speed): # initialises the particle's attributes e.g. color
+
+                    super().__init__(turt_can)
+                    #self = RawTurtle(turt_can)
+                    
+                    self.hideturtle() # hides the current turtle
+                    self.speed(0)
+                    self.penup()
+                    self.shape("circle")
+                    self.turtlesize(stretch_wid=1, stretch_len=1)
+                    self.pencolor(colour)
+                    self.fillcolor(colour)
+                    self.pensize(5)
+                    self.goto(random.randint(-130, 129),random.randint(-129, 130))
+                    self.dx = speed
+                    self.dy = speed
+                    self.showturtle()
+                    turt_can.update()
+                    #turt_can.tracer(1)
+                    #print(vars(self))
+
+                    #self.move_particle()
+
+                def move_particle(self):
+                    #print("move_particle is running")
+                    
+                    self.setx(self.xcor() + self.dx)
+                    self.sety(self.ycor() + self.dy)
+
+                def bounce_particle(self):
+
+                    if self.xcor() < -130 or self.xcor() > 129:
+                        #self.setx(100)
+                        self.dx *= -1
+                    if self.ycor() < -129 or self.ycor() > 130:
+                        #self.sety(100)
+                        self.dy *= -1
+                    
+
             particles_list = []
             for i in range(int_numofparts):
-                color = "blue"
+                colour = "blue"
                 speed = 2
-                particle = Particle(color, speed)
+                particle = Particle(turt_can, colour, speed)
                 particles_list.append(particle)
-            while True:
+
+            def keep_parts_moving():
+    
                 for particle in particles_list:
                     particle.move_particle()
                     particle.bounce_particle()
+                turt_can.update()
+                turt_can.ontimer(keep_parts_moving, 50)
+
+            keep_parts_moving()
 
 
         part_num_button = Button(simulator_win, text="Submit", cursor="hand2", command=get_submit)
