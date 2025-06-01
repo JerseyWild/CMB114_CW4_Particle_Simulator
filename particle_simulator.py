@@ -51,13 +51,19 @@ def home_window(): # function responsible for the master/home page
 
         # CREATING A TITLE ON SIMULATOR WINDOW
         part_num_title = Label(simulator_win, text="Number of particles:")
-        part_num_title.place(x=50, y=25)
+        part_num_title.place(x=20, y=125)
 
         numofparts = StringVar() # defines a String Variable
+        typeofpart = StringVar()
 
         # CREATING AN ENTRY BOX ON SIMULATOR WINDOW
         part_num_entry = Entry(simulator_win, textvariable=numofparts, cursor="hand2") # creates an entry box for the number of particles to be added
-        part_num_entry.place(x=50,y=50)
+        part_num_entry.place(x=20,y=150)
+
+        part_types_list = ["Helium", "Neon", "Argon"]
+        part_type_dropdown = ttk.Combobox(simulator_win, textvariable=typeofpart, cursor="hand2", values=part_types_list)
+        part_type_dropdown.set("Choose a particle type")
+        part_type_dropdown.place(x=20, y=50)
 
 
 
@@ -109,10 +115,12 @@ def home_window(): # function responsible for the master/home page
     ##    #turt_can.update()
 
     # -----------------------------------------------------------
-        #global temp
+        
         temp = 0
 
         def get_temp(temp_from_scale):
+            global temp
+            temp = temp_scale.get()
             print(temp_from_scale)
 
         # CREATING A TEMPERATURE SCALE
@@ -133,12 +141,12 @@ def home_window(): # function responsible for the master/home page
             class Particle(RawTurtle): # class responsible for controlling each particle
             #part = RawTurtle(turt_can)
 
-                def __init__(self, turt_can, colour, speed, temp=temp_scale.get(), rad=neon_collision_rad): # method responsible for initialising the particle's attributes e.g. color
+                def __init__(self, turt_can, colour, speed, temp, rad=neon_collision_rad): # method responsible for initialising the particle's attributes e.g. color
         
                     super().__init__(turt_can)
                     #self = RawTurtle(turt_can)
                     print("innit works")
-                    print(temp)
+                    print("temperature=", temp)
                     self.hideturtle() # hides the current turtle
                     self.speed(0) # sets the turtle speed to 0 - this special setting means the turtle animation occurs almost instantly/as fast as possible
                     self.penup() # lifts the pen up
@@ -194,9 +202,9 @@ def home_window(): # function responsible for the master/home page
 
             particles_list = [] # creates an empty list to be used for storing all of the particle turtles
             for i in range(int_numofparts): # loops for the number of particles added by the user
-                colour = "blue" # defines colour as blue
-                speed = 2 # defines speed as 2
-                temp_factor = 0.01
+                colour = "pink" # defines colour as blue
+                speed = 100 # defines speed as 2
+                temp_factor = 0.01 # defines temp_factor as 0.01
                 particle = Particle(turt_can, colour, speed, temp, neon_collision_rad) # calls the particle class, passing turt_can, colour and speed as parameters
                 particles_list.append(particle) # adds the current particle turtle to the list of particles
 
@@ -210,8 +218,11 @@ def home_window(): # function responsible for the master/home page
             keep_parts_moving() # calls the keep_parts_moving function
 
 
+        part_type_button = Button(simulator_win, text="Submit", cursor="hand2")
+        part_type_button.place(x=175, y=48)
+
         part_num_button = Button(simulator_win, text="Submit", cursor="hand2", command=get_parts) # creates a submit button, when clicked calls the get_submit function
-        part_num_button.place(x=180, y=45)
+        part_num_button.place(x=150, y=150)
                 
 
 
