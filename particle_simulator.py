@@ -1,22 +1,23 @@
-# this is my individual coding project python file
 
+# ---------------------------------------------------JERSEY WILDEN CMB114 CW4 PARTICLE SIMULATOR PROGRAM --------------------------------------------
+
+# IMPORTING ALL NECESSARY MODULES
 from tkinter import * # imports all modules from tkinter
 from tkinter import ttk # imports themed tkinter from tkinter
 from turtle import * # imports all modules from tutrle
-import importlib
 import random # imports random for use in randomly generating numbers
-import math
-from scipy import constants
-import time
+import math # imports math for use in square roots
+from scipy import constants # imports constants from scipy for use in the ideal gas constant (R)
+import time # imports time for use in the time elapsed counter
 
-
-#importlib.reload(*) # forces turtle to be reloaded to prevent crashing
 
 numofcollisions = 0
 particles_list = []
+collided_pairs = set()
+stop_timer = False
 
-
-def home_window(): # function responsible for the master/home page
+# FUNCTION RESPONSIBLE FOR THE MASTER/HOME PAGE
+def home_window():
 
     master = Tk() # create a master window
     master.title("Particle Simulator - Home Page") # name the window
@@ -28,68 +29,60 @@ def home_window(): # function responsible for the master/home page
 
     master.geometry(f"800x500+{center_x}+{center_y}") # set the window dimensions
 
-    home_title = Label(master, text="PARTICLE SIMULATOR", font=("Impact", 30)) # creates a title
-    home_title.place(x=250, y=100) # places the title at the top middle of the window
+    master.configure(bg="lightblue")
 
-    exit_button = Button(master, text="Exit", font=(15), padx=70, command=master.destroy, # creates an exit button, when clicked it destroys the master window, hence quitting the program
-                          cursor="hand2", activebackground="lightgrey", activeforeground="black", background="lightpink")
+    home_title = Label(master, text="PARTICLE SIMULATOR", font=("Impact", 40), bg="lightblue", fg="white") # creates a title
+    home_title.place(x=200, y=100) # places the title at the top middle of the window
+
+    exit_button = Button(master, text="Exit", font=(15), fg="white", padx=70, command=master.destroy, # creates an exit button, when clicked it destroys the master window, hence quitting the program
+                          cursor="hand2", activebackground="lightgrey", activeforeground="black", background="firebrick1")
     exit_button.place(x=315, y=250) # places the exit button in the middle of the screen, between the enter and options buttons
 
-    options_button = Button(master, text="Options", font=(15), padx=52, # creates an options button
-                          cursor="hand2", activebackground="lightgrey", activeforeground="black", background="lightblue")
-    options_button.place(x=315, y=300) # places the options button in the middle of the screen, below the exit button
-
-
-    
-    def simulator_window(): # function responsible for the simulator page
-
-
-
-        #neon_vdw_attraction = 0.208 # van der Waals attraction factor (a) for Neon in barL^2/mol^2
-
+    # FUNCTION RESPONSIBLE FOR THE SIMULATOR PAGE
+    def simulator_window():
         
-
+        global numofparts,numofparts_label, actual_max_speed_label, collision_count_label, time_elapsed_label
+        
         # CREATING THE SIMULATOR WINDOW
         simulator_win = Toplevel(master) # creates a window on top of the home page window for the simulator
         simulator_win.title("Particle Simulator - Simulator Page") # gives the simulator window a window title
         simulator_win.geometry(f"800x500+{center_x}+{center_y}") # sets the dimensions of the window and places it in the middle of the screen
-
+        simulator_win.configure(bg="mediumaquamarine")
+        
         # CREATING A TITLE ON SIMULATOR WINDOW
-        part_num_title = Label(simulator_win, text="Number of particles")
+        part_num_title = Label(simulator_win, text="Number of particles", bg="aquamarine")
         part_num_title.place(x=20, y=125)
-
-        
-        
 
         # CREATING AN ENTRY BOX ON SIMULATOR WINDOW
         numofparts = StringVar() # defines a String Variable
         part_num_entry = Entry(simulator_win, textvariable=numofparts, cursor="hand2") # creates an entry box for the number of particles to be added
         part_num_entry.place(x=20,y=150)
 
-
-        part_type_label = Label(simulator_win, text="Choose a particle type")
+        # CREATING A LABEL ON SIMULATOR WINDOW FOR PARTICLE TYPE
+        part_type_label = Label(simulator_win, text="Choose a particle type", bg="aquamarine")
         part_type_label.place(x=20, y=25)
-            
+
+        # CREATING A DROPDOWN MENU ON SIMULATOR WINDOW FOR PARTICLE TYPE
         typeofpart = StringVar()
         part_type_dropdown = ttk.Combobox(simulator_win, textvariable=typeofpart, cursor="hand2")
         part_type_dropdown["values"] = ["Helium", "Neon", "Argon"]
         part_type_dropdown.place(x=20, y=50)
 
-        actual_max_speed_label = Label(simulator_win, text="Max speed = 0.00 m/s")
-        actual_max_speed_label.place(x=550, y=400)
-
-        collision_count_label = Label(simulator_win, text="Number of collisions = 0")
-        collision_count_label.place(x=550, y=425)
-
-        numofparts_label = Label(simulator_win, text=("Number of particles = " + str(len(particles_list))))
-        numofparts_label.place(x=550, y=475)
+        numofparts_label = Label(simulator_win, text=("Number of particles = " + str(len(particles_list))), font=("Courier New", 12), bg="aquamarine")
+        numofparts_label.place(x=20, y=200)
         
+        actual_max_speed_label = Label(simulator_win, text="Max speed = 0.00 m/s", font=("Courier New", 12), bg="aquamarine")
+        actual_max_speed_label.place(x=20, y=225)
 
+        collision_count_label = Label(simulator_win, text="Number of collisions = 0", font=("Courier New", 12), bg="aquamarine")
+        collision_count_label.place(x=20, y=250)
 
+        time_elapsed_label = Label(simulator_win, text="Time elapsed = 0.00 s", font=("Courier New", 12), bg="aquamarine")
+        time_elapsed_label.place(x=20, y=275)
 
         # CREATING A TKINTER CANVAS ON SIMULATOR_WINDOW
         simulator_can = Canvas(simulator_win, height=300, width=300) # creates a white canvas in the middle of the window
-        simulator_can.place(x=250, y=75) # places the canvas in the middle of the screen
+        simulator_can.place(x=300, y=75) # places the canvas in the middle of the screen
 
         # CREATING A TURTLE CANVAS ON THE TKINTER CANVAS ON SIMULATOR WINDOW
         turt_can = TurtleScreen(simulator_can) # makes the canvas a turtle canvas
@@ -119,64 +112,25 @@ def home_window(): # function responsible for the master/home page
         box.penup() # lifts the pen up as no more drawings are needed
 
         
-        
-                
-    
-    
-        # part = Particle()
-    ##
-    ##    for i in range(int_numofparts):
-    ##    turt_can.tracer(0)
-    ##
-    ##    part.showturtle()
-    ##    turt_can.tracer(1)
-    ##
-    ##    while True:
-    ##    #turt_can.update()
-
-    # -----------------------------------------------------------
-        
-
         # CREATING A TEMPERATURE SCALE
-        temp_scale = Scale(simulator_win, label="Temperature scale", from_=500, to=1, length=200, cursor="hand2") # creates a temperature scale for changing the temperature
-        temp_scale.place(x=600,y=100)
+        temp_scale = Scale(simulator_win, label="Temperature Scale (K)", from_=500, to=1, length=200,
+                           cursor="hand2", bg="aquamarine") # creates a temperature scale for changing the temperature
+        temp_scale.place(x=620,y=100)
 
-        def collision_occurred(part1, part2):
-            relative_x_speed = part1.dx - part2.dx
-            relative_y_speed = part1.dy - part2.dy
-            dx = part2.xcor() - part1.xcor()
-            dy = part2.ycor() - part1.ycor()
-            distance = math.sqrt(dx**2 + dy**2)
-            normal_x = dx / distance
-            normal_y = dy /distance
-            relative_normal_speed = relative_x_speed * normal_x + relative_y_speed * normal_y
-
-            if relative_normal_speed > 0:
-                return
-            #print("radius =", part1.radius)
-            part1.dx -= 2 * relative_normal_speed * normal_x
-            part1.dy -= 2 * relative_normal_speed * normal_y
-
-            part2.dx += 2 * relative_normal_speed * normal_x
-            part2.dy += 2 * relative_normal_speed * normal_y
-
-            offset_parts = (part1.radius + part2.radius - distance) / 2
-            part1.goto(part1.xcor() - offset_parts * normal_x, part1.ycor() - offset_parts * normal_y)
-            part2.goto(part2.xcor() + offset_parts * normal_x, part2.ycor() + offset_parts * normal_y)
-
-        
-
-
-        def get_parts(): # function responsible for dealing with the number of particles inputted
+        # FUNCTION RESPONSIBLE FOR DEALING WITH ALL PARTICLES ADDED
+        def get_parts():
+            global stop_timer, int_numofparts
+            stop_timer = False
             int_numofparts = int(numofparts.get()) # makes numofparts an integer
 
+            # CLASS RESPONSIBLE FOR THE PARTICLES AND THEIR MOVEMENT
             class Particle(RawTurtle): # class responsible for controlling each particle
-            #part = RawTurtle(turt_can)
 
+                # METHOD RESPONSIBLE FOR INITIALISING VARIABLES
                 def __init__(self, turt_can, colour, speed, current_temp): # method responsible for initialising the particle's attributes e.g. color
-                    #temp = temp_scale.get()
+
                     super().__init__(turt_can)
-                    #self = RawTurtle(turt_can)
+
                     self.hideturtle() # hides the current turtle
                     self.speed(0) # sets the turtle speed to 0 - this special setting means the turtle animation occurs almost instantly/as fast as possible
                     self.penup() # lifts the pen up
@@ -195,103 +149,101 @@ def home_window(): # function responsible for the master/home page
                     
                     self.showturtle() # shows the current turtle
                     turt_can.update() # updates the turtle canvas
-                    #turt_can.tracer(1)
-                    #print(vars(self))
 
-                    #self.move_particle()
-
-                def move_particle(self, particles_list, current_temp, temp_factor): # method responsible for the movement of the particles
-                    #global temp_scale
-                    #current_temp = temp_scale.get()
+                
+                # METHOD RESPONSIBLE FOR THE PARTICLES' MOVEMENT
+                def move_particle(self, particles_list, current_temp, temp_factor): # method responsible for the movement of the particles 
+        
                     actual_max_speed = ((3*constants.R * current_temp)/0.004)**0.5 # uses the root mean square speed (vRMS) formula to find the maximum possible speed based on the current temperature and molar mass of the particle type
-                    actual_max_speed_label = Label(simulator_win, text=(f"Max speed = {actual_max_speed:.2f} m/s"))
-                    actual_max_speed_label.place(x=550, y=400)
+                    actual_max_speed_label.config(text=f"Max speed = {actual_max_speed:.2f} m/s")
 
-                    turtle_max_speed = actual_max_speed * 0.01
-                    #dampening_factor = 0.99
-                    if self.temp != 0:
-                        scale_factor = (current_temp / self.temp) * temp_factor
-                        self.dx *= scale_factor
-                        self.dy *= scale_factor
+                    turtle_max_speed = actual_max_speed * 0.002 # scales the speed to a sensible level
 
-                        #self.dx *= dampening_factor
-                        #self.dy *= dampening_factor
-                        self.dx = max(-turtle_max_speed, min(turtle_max_speed, self.dx))
-                        self.dy = max(-turtle_max_speed, min(turtle_max_speed, self.dy))
-
-                    self.temp = current_temp
+                    for i in range(3):
                     
-                    # MOVES THE PARTICLE
-                    new_xcor = self.xcor() + self.dx # moves the particle by dx
-                    new_ycor = self.ycor() + self.dy # moves the particle by 
+                        if self.temp != 0: # increases the speed of the current particles in proportion to temperature
+                            scale_factor = (current_temp / self.temp) * temp_factor
+                            self.dx *= scale_factor
+                            self.dy *= scale_factor
 
-                    # BOUNCES THE PARTICLE OFF THE BOUNDARY BOX
-                    if new_xcor < -127 or new_xcor > 127: # if the x coordinates of the particle exceeds the boundary box
-                        #self.setx(100)
-                        self.dx *= -0.8 # inverts the dx, hence bouncing the particle off the boundary box
-                        self.dx += random.uniform(-0.05, 0.05)
-                    if new_ycor < -126 or new_ycor > 126: # if the y coordinates of the particle exceeds the boundary box
-                        #self.sety(100)
-                        self.dy *= -0.8 # inverts the dy, hence bouncing the particle off the boundary box
-                        self.dx += random.uniform(-0.05, 0.05)
-                    # ATTRACTION AND REPULSION BETWEEN PARTICLES
-                    
-                    for part in particles_list:
+                            self.dx = max(-turtle_max_speed, min(turtle_max_speed, self.dx)) # sets max vals for dx
+                            self.dy = max(-turtle_max_speed, min(turtle_max_speed, self.dy)) # sets max vals for dy
+
+                        self.temp = current_temp
                         
-                        if part != self and abs(part.xcor() - self.xcor()) < 50 and abs(part.ycor() - self.ycor() < 50):
+                        # MOVES THE PARTICLE
+                        new_xcor = self.xcor() + self.dx # moves the particle by dx
+                        new_ycor = self.ycor() + self.dy # moves the particle by 
+
+                        # BOUNCES THE PARTICLE OFF THE BOUNDARY BOX
+                        if new_xcor < -127 or new_xcor > 127: # if the x coordinates of the particle exceeds the boundary box
+                          
+                            self.dx *= -1 # inverts the dx, hence bouncing the particle off the boundary box
+                            self.dx += random.uniform(-0.05, 0.05)
+                        if new_ycor < -126 or new_ycor > 126: # if the y coordinates of the particle exceeds the boundary box
+                     
+                            self.dy *= -1 # inverts the dy, hence bouncing the particle off the boundary box
+                            self.dx += random.uniform(-0.05, 0.05)
+                    
+
+                        for part in particles_list: # loops through all current particles
+
+                            x_distanceapart = part.xcor() - self.xcor() # x distance apart between 2 particles from their center
+                            y_distanceapart = part.ycor() - self.ycor() # y distance apart between 2 particles from their center
+                            overall_distanceapart = math.sqrt(x_distanceapart**2 + y_distanceapart**2) # direct distance apart between 2 particles using Pythagoras' theorem
                             
-                            dx = part.xcor() - self.xcor()
-                            dy = part.ycor() - self.ycor()
-                            distance = math.sqrt(dx**2 + dx**2)
-                            global numofcollisions
-                            collision_count_label = Label(simulator_win, text=("Number of collisions = " + str(numofcollisions)))
-                            collision_count_label.place(x=550, y=425)
-                            if distance < (self.radius + part.radius):
-                                numofcollisions += 1
-                                #print("COLLISION OCCURRED")
-                                collision_count_label = Label(simulator_win, text=("Number of collisions = " + str(numofcollisions)))
-                                collision_count_label.place(x=550, y=425)
+                            if part != self and overall_distanceapart < 23: # if the 2 particles being investigated for collisions are different particles and their distance apart is < 10 in both x and y directions (to only test those particles close enough to collide - speeds up program)
                                 
-                                collision_occurred(self, part)
+                                if overall_distanceapart <= 5*(2*(self.radius + part.radius)): # if the distance between the 2 particles is the sum of their radii this means they are touching
+                                    collision_id = tuple(sorted([id(self), id(part)])) # gives the current collision a unique id
+                                    global collided_pairs
+                                    
+                                    if collision_id not in collided_pairs: # if this collision has only occurred once/not before
+                                        
+                                        collided_pairs.add(collision_id)
+                                        global numofcollisions
+                                        numofcollisions += 1 # 1 more collision has occurred
+                                        self.dx, part.dx = part.dx, self.dx
+                                        self.dy, part.dy = part.dy, self.dy
+                                        collision_count_label.config(text=("Number of collisions = " + str(numofcollisions))) # updates the collision label with the new collision (+1 collision)
+                                        
+        
+                        self.goto(new_xcor, new_ycor) # move the new particle to the new x and y cords
 
-    
-                    self.goto(new_xcor, new_ycor)
-
+            # FUNCTION RESPONSIBLE FOR THE TIME ELAPSED OF THE PARTICLES
             def end_time_func(start_t, t_elapsed_label):
-                end_t = time.time()
-                #print("end time =", end_time)
-                t_elapsed_label.config(text=f"Time elapsed = {end_t-start_t:.2f} s")
-                simulator_win.after(1000, lambda: end_time_func(start_t, t_elapsed_label))
+                
+                global end_t, stop_timer
+                if stop_timer == True:
+                    return
+                end_t = time.time() # ends the timer
+                t_elapsed_label.config(text=f"Time elapsed = {end_t-start_t:.2f} s") # prints the elapsed time
+                simulator_win.after(1000, lambda: end_time_func(start_t, t_elapsed_label)) # refreshes the elapsed time
 
-
-
-            #particles_list = [] # creates an empty list to be used for storing all of the particle turtles
 
             global particles_list
             
             for i in range(int_numofparts): # loops for the number of particles added by the user
                 
                 colour = "pink" # defines colour as blue
-                
                 particle = Particle(turt_can, colour, speed, temp_scale.get()) # calls the particle class, passing turt_can, colour and speed as parameters
-                
                 particles_list.append(particle) # adds the current particle turtle to the list of particles
-                #print(particles_list)
-                #print(len(particles_list))
-                if len(particles_list) == 1 and i == 0:
-                    #print("if statement is running")
-                    start_time = time.time()
-                    time_elapsed_label = Label(simulator_win, text="Time elapsed = 0.00 s")
-                    time_elapsed_label.place(x=550, y=450)
-                    end_time_func(start_time, time_elapsed_label)
-                    #print("start time =", start_time)
+ 
+                if len(particles_list) == 1 and i == 0: # ensures this is the first particle being added
+                    
+                    global start_time
+                    start_time = time.time() # starts the timer
+                    end_time_func(start_time, time_elapsed_label) # calls end_time_func
+                
 
                 temp_factor_num = 1.1 # defines temp_factor as 0.01
                 particle.move_particle(particles_list, temp_scale.get(), temp_factor_num)
 
             numofparts_label.config(text=f"Number of particles = {len(particles_list)}")
 
-            def keep_parts_moving(): # function responsible for the infinite movement of the particles
+            # FUNCTION RESPONSIBLE FOR THE INFINITE MOVEMENT OF THE PARTICLES UNLESS CLEARED
+            def keep_parts_moving():
+                
                 turt_can.tracer(0)
                 for particle in particles_list: # loops through all of the particles in the list
                     particle.move_particle(particles_list, temp_scale.get(), temp_factor_num) # calls the move_particle method
@@ -302,36 +254,72 @@ def home_window(): # function responsible for the master/home page
             keep_parts_moving() # calls the keep_parts_moving function
 
 
-    
-
-
-
-        part_type_button = Button(simulator_win, text="Submit", cursor="hand2")
+        part_type_button = Button(simulator_win, text="Submit", cursor="hand2") # creates a submit button
         part_type_button.place(x=175, y=48)
 
-        part_num_button = Button(simulator_win, text="Submit", cursor="hand2", command=get_parts) # creates a submit button, when clicked calls the get_submit function
+        part_num_button = Button(simulator_win, text="Submit", cursor="hand2", command=get_parts) # creates a submit button, when clicked calls the get_parts function
         part_num_button.place(x=150, y=150)
 
-        goback_button = Button(simulator_win, text="Go Back", cursor="hand2", command=simulator_win.destroy)
-        goback_button.place(x=50, y=450)
+        # FUNCTION RESPONSIBLE FOR CLEARING ALL OF THE CURRENT PARTICLES IN THE TURTLE CANVAS AND RESETTING ALL LIVE STATS TO 0
+        def clear_parts():
 
-
+            for particle in particles_list: # deletes every particle
+                particle.hideturtle()
+                particle.clear()
                 
+            particles_list.clear()
+
+            # RESETS ALL THE LIVE STATS TO 0
+            numofparts_label.config(text="Number of particles = 0")
+            actual_max_speed_label.config(text="Max speed = 0.00 m/s")
+            collision_count_label.config(text="Number of collisions = 0")
+            time_elapsed_label.config(text=f"Time elapsed = 0.00 s")
+            global start_time, end_t, stop_timer
+            start_time = None
+            end_t = None
+            stop_timer = True
 
 
-    #turt_can.update() # updates the canvas so we can now see turtle animations but the black arrow is hidden
+        clear_parts_button = Button(simulator_win, text="Clear all particles", command=clear_parts) # creates a button, when clioked clears all particles
+        clear_parts_button.place(x=50, y=350)
+    
+        simulator_goback_button = Button(simulator_win, text="Go Back", cursor="hand2", command=simulator_win.destroy) # creates a go back button
+        simulator_goback_button.place(x=50, y=450)
 
-    def options_window(): # function responsible for the options window
-        pass
 
-    enter_button = Button(master, text="Enter the simulator", font=(15), command=simulator_window,
-                          cursor = "hand2", activebackground="lightgrey", activeforeground="black", background="lightgreen")
+    # FUNCTION RESPONSIBLE FOR THE ABOUT WINDOW
+    def about_window():
+        
+        # CREATING THE ABOUT WINDOW
+        about_win = Toplevel(master) # creates a window on top of the home page window for the simulator
+        about_win.title("Particle Simulator - About Page") # gives the simulator window a window title
+        about_win.geometry(f"800x500+{center_x}+{center_y}") # sets the dimensions of the window and places it in the middle of the screen
+        about_goback_button = Button(about_win, text="Go Back", cursor="hand2", command=about_win.destroy)
+        about_goback_button.place(x=50, y=450)
+        about_label = Label(about_win, text="The Python file particle_simulator.py is a program that simulates the molecular dynamics of Helium atoms.\n\
+                            The atomic weight and radius of this element is taken into consideration when performing calculations.\n\
+                            The user can add a variable amount of particles, clear all of the particles and adjust the temperature in K.\n\
+                            The root mean square speed (vRMS) formula is applied to Helium to determine the maximum temperature of the particles at the current temperature.\n\
+                            The particles collide with both the grey container walls and each other to create a realistic particle simulation.\n\
+                            As particles collide with each other, the number of collisions is displayed live.\n\
+                            The time elapsed is displayed, which starts counting as soon as the initial particles are added.")
+        about_label.place(x=-85, y=175)
+
+    enter_button = Button(master, text="Enter the simulator", font=(15), fg="white", command=simulator_window,
+                          cursor = "hand2", activebackground="lightgrey", activeforeground="black", background="seagreen2")
     enter_button.place(x=315, y=200)
 
-    master.mainloop()
+
+    about_button = Button(master, text="About", font=(15), fg="white", padx=52, command=about_window, # creates an options button
+                          cursor="hand2", activebackground="lightgrey", activeforeground="black", background="mediumpurple1")
+    about_button.place(x=315, y=300) # places the options button in the middle of the screen, below the exit button
+
+    
+
+    master.mainloop() # keeps the home/master window running unless destroyed
 
 
-home_window()
+home_window() # calls the home_window function to start the program/GUI
 
     
 
